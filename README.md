@@ -93,3 +93,13 @@ L.grad = 1.0   (∂L/∂L)
 - Increasing `f` by 0.01 would increase `L` by ~0.04
 
 This manual walkthrough shows how the chain rule propagates gradients backward through each operation, computing how each input parameter affects the final output.
+
+### Common Error
+If you reuse multiple variables, for example:
+```text
+a = Value(3.0)
+b = a + a
+```
+then the gradients are going to be inaccurate.
+
+**to solve this the gradients must be added together**
