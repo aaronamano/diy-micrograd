@@ -18,12 +18,42 @@ Backpropagation computes gradients by applying the chain rule backwards through 
 **Tanh**: `z = tanh(x)`
 - `∂z/∂x = 1 - tanh²(x)`
 - Gradient is scaled by the derivative of the activation function
+- **Role**: Non-linear activation that introduces non-linearity and squashes outputs to [-1, 1], preventing exploding gradients while learning complex patterns
 ### Chain Rule
 When operations are composed (e.g., `L = tanh(w*x + b)`), gradients multiply through each step:
 - `∂L/∂w = ∂L/∂tanh * ∂tanh/∂(w*x+b) * ∂(w*x+b)/∂w`
 - This allows computing how each parameter affects the final output
 ### Gradient Accumulation
 Gradients accumulate when a node is used multiple times in the graph, ensuring all paths contribute to the final derivative.
+
+## Neural Network Implementation
+
+We implemented a complete neural network from scratch using our custom `Value` class that supports automatic differentiation:
+
+### Core Components
+- **Value Class**: Custom scalar type that tracks operations and enables backpropagation through computational graphs
+- **Automatic Differentiation**: Implements gradient computation for `+`, `*`, `tanh`, `exp`, and power operations
+- **Backpropagation**: Uses topological sorting to efficiently compute gradients backwards through the network
+- **Neuron**: Single unit with weights, bias, and tanh activation
+- **Multi-Layer Perceptron**: Stacked layers of neurons for complex function approximation
+
+### Training Process
+1. **Forward Pass**: Compute predictions by passing inputs through the network
+2. **Loss Calculation**: Mean squared error between predictions and targets using `sum((yout - ygt)**2 for ygt, yout in zip(ys, ypred), Value(0.0))`
+3. **Backward Pass**: Compute gradients of loss with respect to all parameters
+4. **Parameter Updates**: Adjust weights and biases using gradient descent
+
+### Key Features
+- **Visual Computational Graphs**: Used Graphviz to visualize forward/backward passes and gradient flow
+- **Gradient Accumulation**: Properly handles cases where variables are reused multiple times
+- **Non-linearity**: Tanh activation enables learning complex, non-linear relationships
+
+**What is a Neural Network?** A neural network is a computational model inspired by biological neurons that learns to approximate complex functions by adjusting parameters (weights and biases) through gradient-based optimization. It transforms inputs through multiple layers of non-linear transformations to produce desired outputs.
+
+### Common Training Errors
+2. **Gradient Accumulation Bug**: Forgetting to zero gradients between training batches causes incorrect gradient accumulation, leading to unstable training. **Solution**: Reset all parameter gradients to 0 before each backward pass.
+
+This implementation demonstrates the fundamental mechanics of modern deep learning frameworks, building from mathematical first principles to a working neural network that can learn from data.
 
 ## Example: Manual Backpropagation for L
 
@@ -94,12 +124,13 @@ L.grad = 1.0   (∂L/∂L)
 
 This manual walkthrough shows how the chain rule propagates gradients backward through each operation, computing how each input parameter affects the final output.
 
-### Common Error
-If you reuse multiple variables, for example:
+### Common Errors
+1. If you reuse multiple variables, for example:
 ```text
 a = Value(3.0)
 b = a + a
 ```
 then the gradients are going to be inaccurate.
 
-**to solve this the gradients must be added together**
+**to solve this, the gradients must be added together**
+2. For training 
